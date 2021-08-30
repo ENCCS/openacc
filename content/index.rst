@@ -18,7 +18,6 @@ OpenACC training
    :maxdepth: 1
    :caption: Reference
 
-   setup
    quick-reference
    guide
 
