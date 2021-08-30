@@ -10,7 +10,6 @@ OpenACC training
 
    0.01_gpu-introduction
    1.01_openacc-introduction
-   1.02_openacc-heat-equation
    2.01_openacc_profiling
    2.02_openacc_optimization
 
