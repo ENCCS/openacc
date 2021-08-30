@@ -1,6 +1,6 @@
-# A lesson in ``sphinx-lesson`` format
+# Introduction 
 
-Teaching material for ENCCS workshop
+OpenACC lessons
 
 ## Credit and license
 
