@@ -168,12 +168,12 @@ Solving Poisson’s equation for incompressible fluid by the Jacobi iteration me
 
         .. tab:: c
 
-            .. literalinclude:: ../examples/OpenACC/himeno/C/himeno_C.c
+            .. literalinclude:: ./examples/himeno_C.c
                 :language: c
 
         .. tab:: fortran
 
-            .. literalinclude:: ../examples/OpenACC/himeno/F/himeno_f77.f
+            .. literalinclude:: ../examples/himeno_f77.f
                 :language: fortran
 
 

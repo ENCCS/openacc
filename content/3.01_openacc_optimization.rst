@@ -12,6 +12,30 @@ OpenACC: Parallelization and Optimization
 - Data access and execution divergence are important for GPU performance
 
 
+.. typealong:: The himeno benchmark
+
+   .. tabs::
+
+      .. tab:: CPU
+
+         .. literalinclude:: ./examples/himeno_C.c
+                                                :language: c
+
+      .. tab:: OpenACC parallel
+
+         .. literalinclude:: ./examples/himeno_C_v01.c
+                                                :language: c
+
+      .. tab:: OpenACC kernels
+
+         .. literalinclude:: ./examples/himeno_C_v02.c
+                                                :language: c
+
+      .. tab:: OpenACC kernels
+
+         .. literalinclude:: ./examples/himeno_C_v03.c
+                                                :language: c
+
 Optimizing data movement
 ^^^^^^^^^^^^^^^^^^^^^^^^
 

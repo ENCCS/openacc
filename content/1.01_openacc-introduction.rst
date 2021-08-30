@@ -320,5 +320,4 @@ Examples:
    -  OpenACC is an directive-based extension to C/Fortran programming
       languages for accelerators
    -  Compute constructs: data, parallel and kernels
-   -  Compiler diagnostics
 
