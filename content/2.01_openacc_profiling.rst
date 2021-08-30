@@ -1,7 +1,7 @@
 .. _openacc-profiling:
 
-OpenACC: Analysis and Parallelization
-=====================================
+OpenACC: Analysis
+=================
 
 Steps in porting code to GPUs
 -----------------------------
@@ -143,22 +143,6 @@ Example: ``PGI_ACC_TIME=1``
             elapsed time(us): total=40 max=40 min=40 avg=40
  Reduction sum: 1.2020569031119108
 
-The Himeno stencil benchmark
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Solving Poisson’s equation for incompressible fluid by the Jacobi iteration method.
-
-.. image:: img/himeno_stencil.png
-
-(https://blogs.fau.de/hager/archives/7850)
-
-The NAS parallel benchmark MG
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Multi-Grid on a sequence of meshes for computational fluid dynamics applications
-
-.. image:: img/multigrid.png
-(https://developer.nvidia.com/blog/high-performance-geometric-multi-grid-gpu-acceleration/)
 
 NVIDIA nvprof
 -------------
@@ -167,6 +151,15 @@ NVIDIA nvprof
 
   - GPU profiling capabilities: High-level usage statistics, Timeline collection, Analysis metrics
   - basic CPU sampling
+
+The Himeno stencil benchmark
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Solving Poisson’s equation for incompressible fluid by the Jacobi iteration method.
+
+.. image:: img/himeno_stencil.png
+
+(https://blogs.fau.de/hager/archives/7850)
 
 
 .. typealong:: himeno code
@@ -195,4 +188,11 @@ NVIDIA nvprof
   6.75%     1.43s  __c_mcopy4_sky
   0.05%      10ms  __c_mcopy4
 
+
+Summary
+-------
+
+- Profiling is essential for optimization
+
+- NVPROF and NVVP for NVIDIA platform
 

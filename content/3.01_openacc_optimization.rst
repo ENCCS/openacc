@@ -1,7 +1,7 @@
 .. _openacc-optimization:
 
-OpenACC: Optimization
-=====================
+OpenACC: Parallelization and Optimization
+=========================================
 
 - Data movement is an important part to optimize when using GPUs
 
@@ -35,7 +35,7 @@ Optimizing data movement
  #pragma acc parallel loop private(i,j,k,s0,ss) reduction(+:gosa)
     for(i=1 ; i<imax-1 ; ++i)
 
-(refer to *examples/OpenACC/himeno/solution/C/himeno_C_v01.c*)
+(refer to *examples/himeno_C_v01.c*)
 
 .. code :: c
 
@@ -75,7 +75,7 @@ Optimizing data movement
       for(j=1 ; j<jmax-1 ; ++j)
         for(k=1 ; k<kmax-1 ; ++k){
 
-(refer to *examples/OpenACC/himeno/solution/C/himeno_C_v02.c*)
+(refer to *examples/himeno_C_v02.c*)
 
 .. code :: c
 
@@ -132,7 +132,7 @@ Collapse Clause
       for(j=1 ; j<jmax-1 ; ++j)
         for(k=1 ; k<kmax-1 ; ++k){
 
-(refer to *examples/OpenACC/himeno/solution/C/himeno_C_v03.c*)
+(refer to *examples/himeno_C_v03.c*)
 
 .. code :: c
 
@@ -208,8 +208,6 @@ This image represents a single gang. When parallelizing our for loops, the loop 
 
 - The Rule of 32 (Warps): The general rule of thumb for programming for NVIDIA GPUs is to always ensure that your vector length is a multiple of 32 (which means 32, 64, 96, 128, ... 512, ... 1024... etc.). This is because NVIDIA GPUs are optimized to use warps. Warps are groups of 32 threads that are executing the same computer instruction.
 
-(refer to *examples/OpenACC/MG/solution/C/MG/mg_v0[1-8].c*)
-
 What values should I try?
 -------------------------
 
@@ -250,21 +248,14 @@ Calling CUDA-kernel from OpenACC-program
       }
     }
 
-(refer to *examples/OpenACC/MG/solution/C/MG/mg_v08.c*)
-
 .. code :: c
 
   extern "C" void resid_cuda(double *u, double *v, double *r,
                              int *n1, int *n2, int *n3,
                              double *a)
  
-(refer to *examples/OpenACC/MG/solution/C/MG/mg_kernels.cu*)
 
 Summary
 -------
-
-- Profiling is essential for optimization
-
-  - NVPROF and NVVP for NVIDIA platform
 
 - Data and Loop optimizations
