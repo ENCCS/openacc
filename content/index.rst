@@ -11,8 +11,8 @@ OpenACC training
    0.01_gpu-introduction
    1.01_openacc-introduction
    1.02_openacc-heat-equation
-   1.02_openacc_profiling
-   1.03_openacc_optimization
+   2.01_openacc_profiling
+   2.02_openacc_optimization
 
 .. toctree::
    :maxdepth: 1
@@ -60,7 +60,7 @@ assumed.
 See also
 --------
 
-There are many excellent resources online for learning OpenACC and CUDA.
+There are many excellent resources online for learning OpenACC.
 To name only few:
 
 - Official `OpenACC site <https://www.openacc.org/>`_
