@@ -104,6 +104,18 @@ OpenACC data model
    -  Fortran: ``!$acc data [clauses]``
    -  clauses can be ``copy``, ``copyin``, ``copyout``, and ``present``
 
+   - ``copy(var-list)`` **on entry:** if data is present on the device on entry, behave as   with the *present* clause, otherwise allocate memory on the device  and copy data from the host to the device.  **on exit:** copy data from the device to the host and deallocate memory on the device if it was allocated on entry
+
+   - ``copyin(var-list)`` **on entry:** same as *copy* on entry, **on exit:** deallocate memory on the device if it was allocated on entry
+
+   -  ``copyout(var-list)`` **on entry:** if data is present on the device on entry, behave as with the *present* clause, otherwise allocate memory on the device **on exit:** same as *copy* on exit
+
+   -  ``present(var-list)``  **on entry/exit:** assume that memory is allocated and that data is present on the device
+
+   - ``create(var-list)``  **on entry:** allocate memory on the device, unless it was already present,  **on exit:** deallocate memory on the device if it was allocated on entry
+
+   - ``reduction(operator:var-list)`` the operator can be ``+,-,*,max,min``, Performs reduction on the (scalar) variables in list
+
 -  Data transfers take place
 
    -  from the **host** to the **device** upon entry to the region
@@ -112,6 +124,98 @@ OpenACC data model
 -  Functionality defined by *data clauses*
 -  *Data clauses* can also be used in ``kernels`` and ``parallel``
    constructs
+
+Data specification
+^^^^^^^^^^^^^^^^^^
+
+-  Data clauses specify functionality for different variables
+-  Overlapping data specifications are not allowed
+-  For array data, *array ranges* can be specified
+
+   -  C/C++: ``arr[start_index:length]``, for instance ``vec[0:n]``
+   -  Fortran: ``arr(start_index:end_index)``, for instance ``vec(1:n)``
+
+-  Note: array data **must** be *contiguous* in memory (vectors,
+   multidimensional arrays etc.)
+
+Default data environment in compute constructs
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+-  All variables used inside the ``parallel`` or ``kernels`` region will
+   be treated as *implicit* variables if they are not present in any
+   data clauses, i.e. copying to and from the device is automatically
+   performed
+-  Implicit *array* variables are treated as having the ``copy`` clause
+   in both cases
+-  Implicit *scalar* variables are treated as having the
+
+   -  ``copy`` clause in ``kernels``
+   -  ``firstprivate`` clause in ``parallel``
+
+Unstructured data regions
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+-  Unstructured data regions enable one to handle cases where allocation
+   and freeing is done in a different scope
+-  Useful for e.g. C++ classes, Fortran modules
+-  ``enter data`` defines the start of an unstructured data region
+
+   -  C/C++: ``#pragma acc enter data [clauses]``
+   -  Fortran: ``!$acc enter data [clauses]``
+   - [clauses] can be ``create(var-list)`` to allocate memory on the device or ``copyin(var-list)`` to allocate memory on the device and copy data from the host to the device
+
+-  ``exit data`` defines the end of an unstructured data region
+
+   -  C/C++: ``#pragma acc exit data [clauses]``
+   -  Fortran: ``!$acc exit data [clauses]``
+   - [clauses] can be ``delete(var-list)`` to deallocate memory on the device or ``copyout(var-list)`` to  Deallocate memory on the device and copy data from the device to  the host
+
+
+Data directive: update
+^^^^^^^^^^^^^^^^^^^^^^
+
+-  Define variables to be updated within a data region between host and
+   device memory
+
+   -  C/C++: ``#pragma acc update [clauses]``
+   -  Fortran: ``!$acc update [clauses]``
+
+-  Data transfer direction controlled by ``host(var-list)`` or
+   ``device(var-list)`` clauses
+
+   -  ``self`` (``host``) clause updates variables from device to host
+   -  ``device`` clause updates variables from host to device
+
+.. -  At least one data direction clause must be present
+
+-  ``update`` is a single line executable directive
+-  Useful for producing snapshots of the device variables on the host or
+   for updating variables on the device
+
+   -  Pass variables to host for visualization
+   -  Communication with other devices on other computing nodes
+
+-  Often used in conjunction with
+
+   -  Asynchronous execution of OpenACC constructs
+   -  Unstructured data regions
+
+
+Data directive: declare
+^^^^^^^^^^^^^^^^^^^^^^^
+
+-  Makes a variable resident in accelerator memory
+-  Added at the declaration of a variable
+-  Data life-time on device is the implicit life-time of the variable
+
+   -  C/C++: ``#pragma acc declare [clauses]``
+   -  Fortran: ``!$acc declare [clauses]``
+
+-  Supports usual data clauses, and additionally
+
+   -  ``device_resident``
+   -  ``link``
+
 
 OpenACC execution model
 -----------------------
@@ -188,7 +292,7 @@ Work sharing construct: ``loop``
 
       .. tab:: OpenACC kernels
 
-         .. literalinclude:: ../examples/sum_kernels.c
+         .. literalinclude:: ./examples/sum_kernels.c
                         :language: c
 
 .. _compiler-diagnostics-1:
