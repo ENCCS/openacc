@@ -11,7 +11,7 @@ OpenACC training
    0.01_gpu-introduction
    1.01_openacc-introduction
    2.01_openacc_profiling
-   2.02_openacc_optimization
+   3.01_openacc_optimization
 
 .. toctree::
    :maxdepth: 1

@@ -261,6 +261,40 @@ Compute constructs: ``parallel``
   - Given a sequence of loop nests, each loop nest may be executed
       simultaneously
 
+Examples:
+^^^^^^^^^
+
+.. code :: c
+
+   const int N=100;
+   #pragma acc data copy(a[0:N])
+   {
+    #pragma acc parallel loop present(a)
+    for (int i=0; i<N; i++)
+        a[i] = a[i] + 1;
+   }
+
+   ...
+   #pragma acc data copyout(a[0:N]), copyin(b[0:N])
+   {
+    #pragma acc parallel loop present(a,b)
+    for (int i=0; i<N; i++)
+        a[i] = b[i] + 1;
+   }
+
+   ...
+   #pragma acc data copyout(a[0:N]), create(b[0:N])
+   {
+    #pragma acc parallel loop
+    for (int i=0; i<N; i++)
+        b[i] = i * 2.0;
+
+    #pragma acc parallel loop present(a,b)
+    for (int i=0; i<N; i++)
+        a[i] = b[i] + 1;
+   }
+
+
 
 Work sharing construct: ``loop``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -276,107 +310,9 @@ Work sharing construct: ``loop``
 - Loop index variables are ``private`` variables by default
 
 
-.. typealong:: Adding two vectors
-
-   .. tabs::
-
-      .. tab:: CPU
-
-         .. literalinclude:: ./examples/sum.c
-                        :language: c
-
-      .. tab:: OpenACC parallel
-
-         .. literalinclude:: ./examples/sum_parallel.c
-                        :language: c
-
-      .. tab:: OpenACC kernels
-
-         .. literalinclude:: ./examples/sum_kernels.c
-                        :language: c
-
-.. _compiler-diagnostics-1:
-
-Compiler diagnostics
---------------------
-
--  Compiler diagnostics is usually the first thing to check when
-   starting the OpenACC work
-
-   -  It can tell you what operations were actually performed
-   -  Data copies that were made
-   -  If and how the loops were parallelized
-
--  The diagnostics is very compiler dependent
-
-   -  Compiler flags
-   -  Level and formatting of information
-
-
--  Diagnostics is controlled by compiler flag ``-Minfo=option``
--  Useful options:
-
    -  ``accel`` – operations related to the accelerator
    -  ``all`` – print all compiler output
    -  ``intensity`` – print loop computational intensity info
-
-Example: ``-Minfo``
-^^^^^^^^^^^^^^^^^^^
-
-.. code:: bash
-
-  $ pgcc -g -O3 -acc -Minfo=acc sum_parallel.c -o sum
-
-  main:
-     21, Generating copy(vecA[:],vecB[:],vecC[:]) [if not already present]
-     23, Generating Tesla code
-         25, #pragma acc loop gang, vector(128) /* blockIdx.x threadIdx.x */
-
-  $ pgcc -g -O3 -acc -Minfo=accel sum_kernels.c -o sum
-
-  main:
-     21, Generating copy(vecA[:],vecB[:],vecC[:]) [if not already present]
-     23, Loop is parallelizable
-         Generating Tesla code
-         23, #pragma acc loop gang, vector(128) /* blockIdx.x threadIdx.x */
-
-
-Example: ``PGI_ACC_TIME=1``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code:: bash
-
-  $ cat slurm-13186502.out  #output of sum_parallel.c
-
-  Accelerator Kernel Timing data
-  main  NVIDIA  devicenum=0
-    time(us): 451
-    21: data region reached 2 times
-        21: data copyin transfers: 3
-             device time(us): total=245 max=100 min=71 avg=81
-        29: data copyout transfers: 3
-             device time(us): total=206 max=72 min=67 avg=68
-    23: compute region reached 1 time
-        23: kernel launched 1 time
-            grid: [800]  block: [128]
-            elapsed time(us): total=41 max=41 min=41 avg=41
-   Reduction sum: 1.2020569031119108
-
- $ cat slurm-13186514.out
-
- Accelerator Kernel Timing data
-  main  NVIDIA  devicenum=0
-    time(us): 453
-    21: data region reached 2 times
-        21: data copyin transfers: 3
-             device time(us): total=247 max=100 min=72 avg=82
-        26: data copyout transfers: 3
-             device time(us): total=206 max=73 min=66 avg=68
-    23: compute region reached 1 time
-        23: kernel launched 1 time
-            grid: [800]  block: [128]
-            elapsed time(us): total=40 max=40 min=40 avg=40
- Reduction sum: 1.2020569031119108
 
 .. keypoints::
 

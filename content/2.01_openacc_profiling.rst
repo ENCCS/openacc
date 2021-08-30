@@ -23,6 +23,125 @@ Steps in porting code to GPUs
 - One should generally start the process at the top with the analyze step. For complex applications, it's useful to have a profiling tool available to learn where your application is spending its execution time and to focus your efforts there.  Since our example code is quite a bit simpler than a full application, we'll skip profiling the code and simply analyze the code by reading it
 
 
+.. _compiler-diagnostics-1:
+
+Compiler diagnostics
+--------------------
+
+-  Compiler diagnostics is usually the first thing to check when
+   starting the OpenACC work
+
+   -  It can tell you what operations were actually performed
+   -  Data copies that were made
+   -  If and how the loops were parallelized
+
+-  The diagnostics is very compiler dependent
+
+   -  Compiler flags
+   -  Level and formatting of information
+
+
+-  Diagnostics is controlled by compiler flag ``-Minfo=option``
+-  Useful options:
+
+   -  ``accel`` – operations related to the accelerator
+   -  ``all`` – print all compiler output
+   -  ``intensity`` – print loop computational intensity info
+
+
+Work sharing construct: ``loop``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- Define a loop to be parallelized
+    - C/C++: ``#pragma acc loop [clauses]``
+    - Fortran: ``!$acc loop [clauses]``
+    - Must be followed by a C/C++ or Fortran loop construct.
+    - Combined constructs with ``parallel`` and ``kernels``
+        - ``#pragma acc kernels loop / !$acc kernels loop``
+        - ``#pragma acc parallel loop / !$acc parallel loop``
+- Similar in functionality to OpenMP ``for/do`` construct
+- Loop index variables are ``private`` variables by default
+
+Example: Adding two vectors
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. typealong:: Adding two vectors
+
+   .. tabs::
+
+      .. tab:: CPU
+
+         .. literalinclude:: ./examples/sum.c
+                                    :language: c
+
+      .. tab:: OpenACC parallel
+
+         .. literalinclude:: ./examples/sum_parallel.c
+                                    :language: c
+
+      .. tab:: OpenACC kernels
+
+         .. literalinclude:: ./examples/sum_kernels.c
+                                    :language: c
+
+``-Minfo``
+^^^^^^^^^^^
+
+.. code:: bash
+
+  $ pgcc -g -O3 -acc -Minfo=acc sum_parallel.c -o sum
+
+  main:
+     21, Generating copy(vecA[:],vecB[:],vecC[:]) [if not already present]
+     23, Generating Tesla code
+         25, #pragma acc loop gang, vector(128) /* blockIdx.x threadIdx.x */
+
+  $ pgcc -g -O3 -acc -Minfo=accel sum_kernels.c -o sum
+
+  main:
+     21, Generating copy(vecA[:],vecB[:],vecC[:]) [if not already present]
+     23, Loop is parallelizable
+         Generating Tesla code
+         23, #pragma acc loop gang, vector(128) /* blockIdx.x threadIdx.x */
+
+
+
+Example: ``PGI_ACC_TIME=1``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code:: bash
+
+  $ cat slurm-13186502.out  #output of sum_parallel.c
+
+  Accelerator Kernel Timing data
+  main  NVIDIA  devicenum=0
+    time(us): 451
+    21: data region reached 2 times
+        21: data copyin transfers: 3
+             device time(us): total=245 max=100 min=71 avg=81
+        29: data copyout transfers: 3
+             device time(us): total=206 max=72 min=67 avg=68
+    23: compute region reached 1 time
+        23: kernel launched 1 time
+            grid: [800]  block: [128]
+            elapsed time(us): total=41 max=41 min=41 avg=41
+   Reduction sum: 1.2020569031119108
+
+ $ cat slurm-13186514.out
+
+ Accelerator Kernel Timing data
+  main  NVIDIA  devicenum=0
+    time(us): 453
+    21: data region reached 2 times
+        21: data copyin transfers: 3
+             device time(us): total=247 max=100 min=72 avg=82
+        26: data copyout transfers: 3
+             device time(us): total=206 max=73 min=66 avg=68
+    23: compute region reached 1 time
+        23: kernel launched 1 time
+            grid: [800]  block: [128]
+            elapsed time(us): total=40 max=40 min=40 avg=40
+ Reduction sum: 1.2020569031119108
 
 The Himeno stencil benchmark
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -41,8 +160,8 @@ Multi-Grid on a sequence of meshes for computational fluid dynamics applications
 .. image:: img/multigrid.png
 (https://developer.nvidia.com/blog/high-performance-geometric-multi-grid-gpu-acceleration/)
 
-Analysis and Parallelization
-----------------------------
+NVIDIA nvprof
+-------------
 
 - NVIDIA nvprof provides a simple interface to collect on a target without using the GUI. (new NSight system)
 
@@ -75,42 +194,5 @@ Analysis and Parallelization
   0.94%     200ms  | ???
   6.75%     1.43s  __c_mcopy4_sky
   0.05%      10ms  __c_mcopy4
-
-OpenACC data model
-^^^^^^^^^^^^^^^^^^
--  Define a region with data declared in the device memory
-
-   -  C/C++: ``#pragma acc data [clauses]`` 
-   -  Fortran: ``!$acc data [clauses]``
-   -  clauses can be ``copy``, ``copyin``, ``copyout``, and ``present``
-
--  Data transfers take place
-
-   -  from the **host** to the **device** upon entry to the region
-   -  from the **device** to the **host** upon exit from the region
-
--  Functionality defined by *data clauses*
--  *Data clauses* can also be used in ``kernels`` and ``parallel``
-   constructs
-
-OpenACC execution model
-^^^^^^^^^^^^^^^^^^^^^^^
-
--  OpenACC includes two different approaches for defining parallel
-   regions
-
-   -  ``kernels`` defines a region to be transferred into a series of
-      kernels to be executed in *sequence* on an accelerator. Work
-      sharing parallelism is defined *automatically* for the separate
-      kernels, but tuning prospects limited.
-
-   -  ``parallel`` defines a region to be executed on an accelerator.
-      Work sharing *parallelism* has to be defined *manually*. Good
-      tuning prospects. 
-
-   -  C/C++: ``#pragma kernels``, ``#pragma parallel loop`` 
-   -  Fortran: ``!acc kernels``, ``!$acc parallel loop``
-
--  With similar work sharing, both can perform equally well
 
 
