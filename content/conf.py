@@ -17,9 +17,9 @@
 
 # -- Project information -----------------------------------------------------
 
-project = "A lesson in ``sphinx-lesson`` format"
-copyright = "2021, Hiphopopotamus Rhymenoceros and individual contributors."
-author = "Hiphopopotamus Rhymenoceros and individual contributors."
+project = "OpenACC"
+copyright = "2021, Jing Gong and individual contributors."
+author = "Jing Gong and individual contributors."
 github_user = "ENCCS"
 github_repo_name = "OpenACC"
 github_version = "main"
