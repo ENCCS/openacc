@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Introduction to OpenACC &mdash; OpenACC  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx_lesson.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx_rtd_theme_ext_color_contrast.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/tabs.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/overrides.css" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/minipres.js"></script>
+        <script>let toggleHintShow = 'Click to show';</script>
+        <script>let toggleHintHide = 'Click to hide';</script>
+        <script>let toggleOpenOnPrint = 'true';</script>
+        <script src="../_static/togglebutton.js"></script>
+        <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+        <script data-domain="enccs.github.io/openacc" defer="defer" src="https://plausible.io/js/script.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="OpenACC: Analysis" href="../2.01_openacc_profiling/" />
+    <link rel="prev" title="Introduction to GPU" href="../0.01_gpu-introduction/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            OpenACC
+              <img src="../_static/ENCCS.jpg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../0.01_gpu-introduction/">Introduction to GPU</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction to OpenACC</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#what-is-openacc">What is OpenACC ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openacc-vs-cuda-or-hip">OpenACC vs. CUDA or HIP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-to-port-code-to-gpu-with-openacc">How to port code to GPU with OpenACC?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openacc-directive-syntax">OpenACC directive syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openacc-data-model">OpenACC data model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#data-specification">Data specification</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#default-data-environment-in-compute-constructs">Default data environment in compute constructs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#unstructured-data-regions">Unstructured data regions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-directive-update">Data directive: update</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-directive-declare">Data directive: declare</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#openacc-execution-model">OpenACC execution model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#compute-constructs-kernels">Compute constructs: <code class="docutils literal notranslate"><span class="pre">kernels</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#compute-constructs-parallel">Compute constructs: <code class="docutils literal notranslate"><span class="pre">parallel</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#work-sharing-construct-loop">Work sharing construct: <code class="docutils literal notranslate"><span class="pre">loop</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#examples">Examples:</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../2.01_openacc_profiling/">OpenACC: Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../3.01_openacc_optimization/">OpenACC: Parallelization and Optimization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick-reference/">Quick Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/">Instructor’s guide</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">OpenACC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Introduction to OpenACC</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/ENCCS/OpenACC/blob/main/content/1.01_openacc-introduction.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="introduction-to-openacc">
+<span id="openacc-introduction"></span><h1>Introduction to OpenACC<a class="headerlink" href="#introduction-to-openacc" title="Permalink to this heading"></a></h1>
+<ul class="simple">
+<li><p>Serial Computing on CPU</p></li>
+</ul>
+<blockquote>
+<div><img alt="../_images/serial_openaccc.png" src="../_images/serial_openaccc.png" />
+</div></blockquote>
+<ul class="simple">
+<li><p>Porting to GPU</p></li>
+</ul>
+<blockquote>
+<div><img alt="../_images/parallel_openacc.png" src="../_images/parallel_openacc.png" />
+</div></blockquote>
+<section id="what-is-openacc">
+<h2>What is OpenACC ?<a class="headerlink" href="#what-is-openacc" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>OpenACC defines a set of compiler directives that allow code regions
+to be offloaded from a host CPU to be computed on a GPU</p>
+<ul>
+<li><p>High level GPU programming</p></li>
+<li><p>Large similarity to OpenMP directives</p></li>
+</ul>
+</li>
+<li><p>Support for both C/C++ and Fortran bindings</p></li>
+<li><p>Extensive guides, tutorials, code samples and documentation on the OpenACC standard
+can be found at <a class="reference external" href="http://www.openacc.org">www.openacc.org</a>.</p></li>
+</ul>
+</section>
+<section id="openacc-vs-cuda-or-hip">
+<h2>OpenACC vs. CUDA or HIP<a class="headerlink" href="#openacc-vs-cuda-or-hip" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Why OpenACC and not <a class="reference external" href="https://en.wikipedia.org/wiki/CUDA">CUDA</a> / <a class="reference external" href="https://en.wikipedia.org/wiki/GPUOpen#AMD_Boltzmann_Initiative">HIP</a>?</p>
+<ul>
+<li><p>Easier to work with</p></li>
+<li><p>Porting of existing software requires less work</p></li>
+<li><p>Same code can be compiled to CPU and GPU versions easily</p></li>
+</ul>
+</li>
+<li><p>Why CUDA/HIP and not OpenACC?</p>
+<ul>
+<li><p>Get access to all features of the GPU hardware</p></li>
+<li><p>More optimization possibilities</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="how-to-port-code-to-gpu-with-openacc">
+<h2>How to port code to GPU with OpenACC?<a class="headerlink" href="#how-to-port-code-to-gpu-with-openacc" title="Permalink to this heading"></a></h2>
+<ul>
+<li><p>Compilers that support OpenACC usually require an option that enables the feature</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>PGI (now NVIDIA HPC SDK): <code class="docutils literal notranslate"><span class="pre">-acc</span></code></p></li>
+<li><p>Cray: <code class="docutils literal notranslate"><span class="pre">-hacc</span></code></p></li>
+<li><p>GNU (partial support): <code class="docutils literal notranslate"><span class="pre">-fopenacc</span></code></p></li>
+<li><p>Without these options a regular CPU version is compiled!</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>OpenACC data model</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>host manages memory of the device</p></li>
+<li><p>host copies data to/from the device</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>OpenACC execution model</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Host-directed execution with an attached accelerator</p></li>
+<li><p>Part of the program is usually executed by the host</p></li>
+<li><p>Computationally intensive parts are <em>offloaded</em> to the accelerator
+that executes <em>parallel regions</em></p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</section>
+<section id="openacc-directive-syntax">
+<h2>OpenACC directive syntax<a class="headerlink" href="#openacc-directive-syntax" title="Permalink to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"></th>
+<th class="head"><p>sentinel</p></th>
+<th class="head"><p>construct</p></th>
+<th class="head"><p>clauses</p></th>
+<th class="head"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td rowspan="4"><p>C/C++</p></td>
+<td rowspan="4"><p><code class="docutils literal notranslate"><span class="pre">#pragma</span> <span class="pre">acc</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">data</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">copy(data)</span></code></p></td>
+<td rowspan="4"><blockquote>
+<div><p>data model</p>
+</div></blockquote>
+<blockquote>
+<div><p>data model</p>
+</div></blockquote>
+<blockquote>
+<div><p>execution model</p>
+</div></blockquote>
+<blockquote>
+<div><p>execution model</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">update</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">host(data)</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">kernels</span></code></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">parallel</span></code></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td rowspan="4"><p>Fortran</p></td>
+<td rowspan="4"><p><code class="docutils literal notranslate"><span class="pre">!$acc</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">data</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">copy(data)</span></code></p></td>
+<td rowspan="4"><blockquote>
+<div><p>data model</p>
+</div></blockquote>
+<blockquote>
+<div><p>data model</p>
+</div></blockquote>
+<blockquote>
+<div><p>execution model</p>
+</div></blockquote>
+<blockquote>
+<div><p>execution model</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">update</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">host(data)</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">kernels</span></code></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">parallel</span></code></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<ul class="simple">
+<li><p>OpenACC uses compiler directives for defining compute regions (and
+data transfers) that are to be performed on a GPU</p></li>
+<li><p>Important constructs</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">parallel</span></code>, <code class="docutils literal notranslate"><span class="pre">kernels</span></code>, <code class="docutils literal notranslate"><span class="pre">data</span></code>, <code class="docutils literal notranslate"><span class="pre">loop</span></code>, <code class="docutils literal notranslate"><span class="pre">update</span></code>,
+<code class="docutils literal notranslate"><span class="pre">host_data</span></code>, <code class="docutils literal notranslate"><span class="pre">wait</span></code></p></li>
+</ul>
+</li>
+<li><p>Often used clauses</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">(condition)</span></code>, <code class="docutils literal notranslate"><span class="pre">async(handle)</span></code></p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="openacc-data-model">
+<h2>OpenACC data model<a class="headerlink" href="#openacc-data-model" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Define a region with data declared in the device memory</p>
+<ul>
+<li><p>C/C++: <code class="docutils literal notranslate"><span class="pre">#pragma</span> <span class="pre">acc</span> <span class="pre">data</span> <span class="pre">[clauses]</span></code></p></li>
+<li><p>Fortran: <code class="docutils literal notranslate"><span class="pre">!$acc</span> <span class="pre">data</span> <span class="pre">[clauses]</span></code></p></li>
+<li><p>clauses can be <code class="docutils literal notranslate"><span class="pre">copy</span></code>, <code class="docutils literal notranslate"><span class="pre">copyin</span></code>, <code class="docutils literal notranslate"><span class="pre">copyout</span></code>, and <code class="docutils literal notranslate"><span class="pre">present</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">copy(var-list)</span></code> <strong>on entry:</strong> if data is present on the device on entry, behave as   with the <em>present</em> clause, otherwise allocate memory on the device  and copy data from the host to the device.  <strong>on exit:</strong> copy data from the device to the host and deallocate memory on the device if it was allocated on entry</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">copyin(var-list)</span></code> <strong>on entry:</strong> same as <em>copy</em> on entry, <strong>on exit:</strong> deallocate memory on the device if it was allocated on entry</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">copyout(var-list)</span></code> <strong>on entry:</strong> if data is present on the device on entry, behave as with the <em>present</em> clause, otherwise allocate memory on the device <strong>on exit:</strong> same as <em>copy</em> on exit</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">present(var-list)</span></code>  <strong>on entry/exit:</strong> assume that memory is allocated and that data is present on the device</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">create(var-list)</span></code>  <strong>on entry:</strong> allocate memory on the device, unless it was already present,  <strong>on exit:</strong> deallocate memory on the device if it was allocated on entry</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">reduction(operator:var-list)</span></code> the operator can be <code class="docutils literal notranslate"><span class="pre">+,-,*,max,min</span></code>, Performs reduction on the (scalar) variables in list</p></li>
+</ul>
+</li>
+<li><p>Data transfers take place</p>
+<ul>
+<li><p>from the <strong>host</strong> to the <strong>device</strong> upon entry to the region</p></li>
+<li><p>from the <strong>device</strong> to the <strong>host</strong> upon exit from the region</p></li>
+</ul>
+</li>
+<li><p>Functionality defined by <em>data clauses</em></p></li>
+<li><p><em>Data clauses</em> can also be used in <code class="docutils literal notranslate"><span class="pre">kernels</span></code> and <code class="docutils literal notranslate"><span class="pre">parallel</span></code>
+constructs</p></li>
+</ul>
+<section id="data-specification">
+<h3>Data specification<a class="headerlink" href="#data-specification" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p>Data clauses specify functionality for different variables</p></li>
+<li><p>Overlapping data specifications are not allowed</p></li>
+<li><p>For array data, <em>array ranges</em> can be specified</p>
+<ul>
+<li><p>C/C++: <code class="docutils literal notranslate"><span class="pre">arr[start_index:length]</span></code>, for instance <code class="docutils literal notranslate"><span class="pre">vec[0:n]</span></code></p></li>
+<li><p>Fortran: <code class="docutils literal notranslate"><span class="pre">arr(start_index:end_index)</span></code>, for instance <code class="docutils literal notranslate"><span class="pre">vec(1:n)</span></code></p></li>
+</ul>
+</li>
+<li><p>Note: array data <strong>must</strong> be <em>contiguous</em> in memory (vectors,
+multidimensional arrays etc.)</p></li>
+</ul>
+</section>
+<section id="default-data-environment-in-compute-constructs">
+<h3>Default data environment in compute constructs<a class="headerlink" href="#default-data-environment-in-compute-constructs" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p>All variables used inside the <code class="docutils literal notranslate"><span class="pre">parallel</span></code> or <code class="docutils literal notranslate"><span class="pre">kernels</span></code> region will
+be treated as <em>implicit</em> variables if they are not present in any
+data clauses, i.e. copying to and from the device is automatically
+performed</p></li>
+<li><p>Implicit <em>array</em> variables are treated as having the <code class="docutils literal notranslate"><span class="pre">copy</span></code> clause
+in both cases</p></li>
+<li><p>Implicit <em>scalar</em> variables are treated as having the</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">copy</span></code> clause in <code class="docutils literal notranslate"><span class="pre">kernels</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">firstprivate</span></code> clause in <code class="docutils literal notranslate"><span class="pre">parallel</span></code></p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="unstructured-data-regions">
+<h3>Unstructured data regions<a class="headerlink" href="#unstructured-data-regions" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p>Unstructured data regions enable one to handle cases where allocation
+and freeing is done in a different scope</p></li>
+<li><p>Useful for e.g. C++ classes, Fortran modules</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">enter</span> <span class="pre">data</span></code> defines the start of an unstructured data region</p>
+<ul>
+<li><p>C/C++: <code class="docutils literal notranslate"><span class="pre">#pragma</span> <span class="pre">acc</span> <span class="pre">enter</span> <span class="pre">data</span> <span class="pre">[clauses]</span></code></p></li>
+<li><p>Fortran: <code class="docutils literal notranslate"><span class="pre">!$acc</span> <span class="pre">enter</span> <span class="pre">data</span> <span class="pre">[clauses]</span></code></p></li>
+<li><p>[clauses] can be <code class="docutils literal notranslate"><span class="pre">create(var-list)</span></code> to allocate memory on the device or <code class="docutils literal notranslate"><span class="pre">copyin(var-list)</span></code> to allocate memory on the device and copy data from the host to the device</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">exit</span> <span class="pre">data</span></code> defines the end of an unstructured data region</p>
+<ul>
+<li><p>C/C++: <code class="docutils literal notranslate"><span class="pre">#pragma</span> <span class="pre">acc</span> <span class="pre">exit</span> <span class="pre">data</span> <span class="pre">[clauses]</span></code></p></li>
+<li><p>Fortran: <code class="docutils literal notranslate"><span class="pre">!$acc</span> <span class="pre">exit</span> <span class="pre">data</span> <span class="pre">[clauses]</span></code></p></li>
+<li><p>[clauses] can be <code class="docutils literal notranslate"><span class="pre">delete(var-list)</span></code> to deallocate memory on the device or <code class="docutils literal notranslate"><span class="pre">copyout(var-list)</span></code> to  Deallocate memory on the device and copy data from the device to  the host</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="data-directive-update">
+<h3>Data directive: update<a class="headerlink" href="#data-directive-update" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p>Define variables to be updated within a data region between host and
+device memory</p>
+<ul>
+<li><p>C/C++: <code class="docutils literal notranslate"><span class="pre">#pragma</span> <span class="pre">acc</span> <span class="pre">update</span> <span class="pre">[clauses]</span></code></p></li>
+<li><p>Fortran: <code class="docutils literal notranslate"><span class="pre">!$acc</span> <span class="pre">update</span> <span class="pre">[clauses]</span></code></p></li>
+</ul>
+</li>
+<li><p>Data transfer direction controlled by <code class="docutils literal notranslate"><span class="pre">host(var-list)</span></code> or
+<code class="docutils literal notranslate"><span class="pre">device(var-list)</span></code> clauses</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">self</span></code> (<code class="docutils literal notranslate"><span class="pre">host</span></code>) clause updates variables from device to host</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">device</span></code> clause updates variables from host to device</p></li>
+</ul>
+</li>
+</ul>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">update</span></code> is a single line executable directive</p></li>
+<li><p>Useful for producing snapshots of the device variables on the host or
+for updating variables on the device</p>
+<ul>
+<li><p>Pass variables to host for visualization</p></li>
+<li><p>Communication with other devices on other computing nodes</p></li>
+</ul>
+</li>
+<li><p>Often used in conjunction with</p>
+<ul>
+<li><p>Asynchronous execution of OpenACC constructs</p></li>
+<li><p>Unstructured data regions</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="data-directive-declare">
+<h3>Data directive: declare<a class="headerlink" href="#data-directive-declare" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p>Makes a variable resident in accelerator memory</p></li>
+<li><p>Added at the declaration of a variable</p></li>
+<li><p>Data life-time on device is the implicit life-time of the variable</p>
+<ul>
+<li><p>C/C++: <code class="docutils literal notranslate"><span class="pre">#pragma</span> <span class="pre">acc</span> <span class="pre">declare</span> <span class="pre">[clauses]</span></code></p></li>
+<li><p>Fortran: <code class="docutils literal notranslate"><span class="pre">!$acc</span> <span class="pre">declare</span> <span class="pre">[clauses]</span></code></p></li>
+</ul>
+</li>
+<li><p>Supports usual data clauses, and additionally</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">device_resident</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">link</span></code></p></li>
+</ul>
+</li>
+</ul>
+</section>
+</section>
+<section id="openacc-execution-model">
+<h2>OpenACC execution model<a class="headerlink" href="#openacc-execution-model" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>OpenACC includes two different approaches for defining parallel
+regions</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">parallel</span></code> defines a region to be executed on an accelerator.
+Work sharing <em>parallelism</em> has to be defined <em>manually</em>. Good
+tuning prospects.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">kernels</span></code> defines a region to be transferred into a series of
+kernels to be executed in <em>sequence</em> on an accelerator. Work
+sharing parallelism is defined <em>automatically</em> for the separate
+kernels, but tuning prospects limited.</p></li>
+</ul>
+</li>
+<li><p>With similar work sharing, both can perform equally well</p></li>
+</ul>
+<section id="compute-constructs-kernels">
+<h3>Compute constructs: <code class="docutils literal notranslate"><span class="pre">kernels</span></code><a class="headerlink" href="#compute-constructs-kernels" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p>Define a region to be transferred to a sequence of kernels for
+execution on the accelerator device</p>
+<ul>
+<li><p>C/C++: <code class="docutils literal notranslate"><span class="pre">#pragma</span> <span class="pre">acc</span> <span class="pre">kernels</span> <span class="pre">[clauses]</span></code></p></li>
+<li><p>Fortran: <code class="docutils literal notranslate"><span class="pre">!$acc</span> <span class="pre">kernels</span> <span class="pre">[clauses]</span></code></p></li>
+</ul>
+</li>
+<li><p>Each separate <em>loop nest</em> inside the region will be converted into a
+separate <em>parallel kernel</em></p></li>
+<li><p>The <em>kernels</em> will be executed in a <em>sequential</em> order</p></li>
+</ul>
+</section>
+<section id="compute-constructs-parallel">
+<h3>Compute constructs: <code class="docutils literal notranslate"><span class="pre">parallel</span></code><a class="headerlink" href="#compute-constructs-parallel" title="Permalink to this heading"></a></h3>
+<ul>
+<li><p>Define a region to be executed on the accelerator device</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>C/C++: <code class="docutils literal notranslate"><span class="pre">#pragma</span> <span class="pre">acc</span> <span class="pre">parallel</span> <span class="pre">[clauses]</span></code></p></li>
+<li><p>Fortran: <code class="docutils literal notranslate"><span class="pre">!$acc</span> <span class="pre">parallel</span> <span class="pre">[clauses]</span></code></p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Without any <em>work sharing</em> constructs, the whole region is executed
+<em>redundantly</em> multiple times</p>
+<ul class="simple">
+<li><p>Given a sequence of loop nests, each loop nest may be executed simultaneously</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="work-sharing-construct-loop">
+<h3>Work sharing construct: <code class="docutils literal notranslate"><span class="pre">loop</span></code><a class="headerlink" href="#work-sharing-construct-loop" title="Permalink to this heading"></a></h3>
+<ul>
+<li><dl class="simple">
+<dt>Define a loop to be parallelized</dt><dd><ul class="simple">
+<li><p>C/C++: <code class="docutils literal notranslate"><span class="pre">#pragma</span> <span class="pre">acc</span> <span class="pre">loop</span> <span class="pre">[clauses]</span></code></p></li>
+<li><p>Fortran: <code class="docutils literal notranslate"><span class="pre">!$acc</span> <span class="pre">loop</span> <span class="pre">[clauses]</span></code></p></li>
+<li><p>Must be followed by a C/C++ or Fortran loop construct</p></li>
+<li><dl class="simple">
+<dt>Combined constructs with <code class="docutils literal notranslate"><span class="pre">parallel</span></code> and <code class="docutils literal notranslate"><span class="pre">kernels</span></code></dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">#pragma</span> <span class="pre">acc</span> <span class="pre">kernels</span> <span class="pre">loop</span> <span class="pre">/</span> <span class="pre">!$acc</span> <span class="pre">kernels</span> <span class="pre">loop</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">#pragma</span> <span class="pre">acc</span> <span class="pre">parallel</span> <span class="pre">loop</span> <span class="pre">/</span> <span class="pre">!$acc</span> <span class="pre">parallel</span> <span class="pre">loop</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>Similar in functionality to OpenMP <code class="docutils literal notranslate"><span class="pre">for/do</span></code> construct</p></li>
+<li><p>Loop index variables are <code class="docutils literal notranslate"><span class="pre">private</span></code> variables by default</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">accel</span></code> – operations related to the accelerator</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">all</span></code> – print all compiler output</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">intensity</span></code> – print loop computational intensity info</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</section>
+<section id="examples">
+<h3>Examples:<a class="headerlink" href="#examples" title="Permalink to this heading"></a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="o">=</span><span class="mi">100</span><span class="p">;</span>
+<span class="cp">#pragma acc data copy(a[0:N])</span>
+<span class="p">{</span>
+<span class="w"> </span><span class="cp">#pragma acc parallel loop present(a)</span>
+<span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">&lt;</span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="w">     </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="p">...</span>
+<span class="cp">#pragma acc data copyout(a[0:N]), copyin(b[0:N])</span>
+<span class="p">{</span>
+<span class="w"> </span><span class="cp">#pragma acc parallel loop present(a,b)</span>
+<span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">&lt;</span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="w">     </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="p">...</span>
+<span class="cp">#pragma acc data copyout(a[0:N]), create(b[0:N])</span>
+<span class="p">{</span>
+<span class="w"> </span><span class="cp">#pragma acc parallel loop</span>
+<span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">&lt;</span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="w">     </span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">2.0</span><span class="p">;</span>
+
+<span class="w"> </span><span class="cp">#pragma acc parallel loop present(a,b)</span>
+<span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">&lt;</span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="w">     </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="admonition-keypoints keypoints admonition" id="keypoints-0">
+<p class="admonition-title">Keypoints</p>
+<ul class="simple">
+<li><p>OpenACC is an directive-based extension to C/Fortran programming
+languages for accelerators</p></li>
+<li><p>Compute constructs: data, parallel and kernels</p></li>
+</ul>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../0.01_gpu-introduction/" class="btn btn-neutral float-left" title="Introduction to GPU" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../2.01_openacc_profiling/" class="btn btn-neutral float-right" title="OpenACC: Analysis" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Jing Gong and individual contributors..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

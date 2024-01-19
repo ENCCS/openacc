@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OpenACC: Analysis &mdash; OpenACC  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx_lesson.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx_rtd_theme_ext_color_contrast.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/tabs.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/overrides.css" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/minipres.js"></script>
+        <script src="../_static/tabs.js"></script>
+        <script>let toggleHintShow = 'Click to show';</script>
+        <script>let toggleHintHide = 'Click to hide';</script>
+        <script>let toggleOpenOnPrint = 'true';</script>
+        <script src="../_static/togglebutton.js"></script>
+        <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+        <script data-domain="enccs.github.io/openacc" defer="defer" src="https://plausible.io/js/script.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="OpenACC: Parallelization and Optimization" href="../3.01_openacc_optimization/" />
+    <link rel="prev" title="Introduction to OpenACC" href="../1.01_openacc-introduction/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            OpenACC
+              <img src="../_static/ENCCS.jpg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../0.01_gpu-introduction/">Introduction to GPU</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../1.01_openacc-introduction/">Introduction to OpenACC</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">OpenACC: Analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#steps-in-porting-code-to-gpus">Steps in porting code to GPUs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#compiler-diagnostics">Compiler diagnostics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#work-sharing-construct-loop">Work sharing construct: <code class="docutils literal notranslate"><span class="pre">loop</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-adding-two-vectors">Example: Adding two vectors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#minfo"><code class="docutils literal notranslate"><span class="pre">-Minfo</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-pgi-acc-time-1">Example: <code class="docutils literal notranslate"><span class="pre">PGI_ACC_TIME=1</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#nvidia-nvprof">NVIDIA nvprof</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#the-himeno-stencil-benchmark">The Himeno stencil benchmark</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#summary">Summary</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../3.01_openacc_optimization/">OpenACC: Parallelization and Optimization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick-reference/">Quick Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/">Instructor’s guide</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">OpenACC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">OpenACC: Analysis</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/ENCCS/OpenACC/blob/main/content/2.01_openacc_profiling.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="openacc-analysis">
+<span id="openacc-profiling"></span><h1>OpenACC: Analysis<a class="headerlink" href="#openacc-analysis" title="Permalink to this heading"></a></h1>
+<section id="steps-in-porting-code-to-gpus">
+<h2>Steps in porting code to GPUs<a class="headerlink" href="#steps-in-porting-code-to-gpus" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>The three key steps in porting to high performance accelerated code:</p>
+<ol class="arabic simple">
+<li><p>Analyze/Identify parallelism</p></li>
+<li><p>Express data movement and parallelism</p></li>
+<li><p>Optimize data movement and loop performance</p></li>
+<li><p>Go back to 1!</p></li>
+</ol>
+</li>
+</ul>
+<img alt="../_images/development-cycle.png" src="../_images/development-cycle.png" />
+<ul class="simple">
+<li><p><em>Analyze</em> your code to determine most likely places needing parallelization or optimization.</p></li>
+<li><p><em>Parallelize</em> your code by starting with the most time consuming parts and check for correctness.</p></li>
+<li><p><em>Optimize</em> your code to improve observed speed-up from parallelization.</p></li>
+<li><p>One should generally start the process at the top with the analyze step. For complex applications, it’s useful to have a profiling tool available to learn where your application is spending its execution time and to focus your efforts there.  Since our example code is quite a bit simpler than a full application, we’ll skip profiling the code and simply analyze the code by reading it</p></li>
+</ul>
+</section>
+<section id="compiler-diagnostics">
+<span id="compiler-diagnostics-1"></span><h2>Compiler diagnostics<a class="headerlink" href="#compiler-diagnostics" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Compiler diagnostics is usually the first thing to check when
+starting the OpenACC work</p>
+<ul>
+<li><p>It can tell you what operations were actually performed</p></li>
+<li><p>Data copies that were made</p></li>
+<li><p>If and how the loops were parallelized</p></li>
+</ul>
+</li>
+<li><p>The diagnostics is very compiler dependent</p>
+<ul>
+<li><p>Compiler flags</p></li>
+<li><p>Level and formatting of information</p></li>
+</ul>
+</li>
+<li><p>Diagnostics is controlled by compiler flag <code class="docutils literal notranslate"><span class="pre">-Minfo=option</span></code></p></li>
+<li><p>Useful options:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">accel</span></code> – operations related to the accelerator</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">all</span></code> – print all compiler output</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">intensity</span></code> – print loop computational intensity info</p></li>
+</ul>
+</li>
+</ul>
+<section id="work-sharing-construct-loop">
+<h3>Work sharing construct: <code class="docutils literal notranslate"><span class="pre">loop</span></code><a class="headerlink" href="#work-sharing-construct-loop" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Define a loop to be parallelized</dt><dd><ul>
+<li><p>C/C++: <code class="docutils literal notranslate"><span class="pre">#pragma</span> <span class="pre">acc</span> <span class="pre">loop</span> <span class="pre">[clauses]</span></code></p></li>
+<li><p>Fortran: <code class="docutils literal notranslate"><span class="pre">!$acc</span> <span class="pre">loop</span> <span class="pre">[clauses]</span></code></p></li>
+<li><p>Must be followed by a C/C++ or Fortran loop construct.</p></li>
+<li><dl class="simple">
+<dt>Combined constructs with <code class="docutils literal notranslate"><span class="pre">parallel</span></code> and <code class="docutils literal notranslate"><span class="pre">kernels</span></code></dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">#pragma</span> <span class="pre">acc</span> <span class="pre">kernels</span> <span class="pre">loop</span> <span class="pre">/</span> <span class="pre">!$acc</span> <span class="pre">kernels</span> <span class="pre">loop</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">#pragma</span> <span class="pre">acc</span> <span class="pre">parallel</span> <span class="pre">loop</span> <span class="pre">/</span> <span class="pre">!$acc</span> <span class="pre">parallel</span> <span class="pre">loop</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>Similar in functionality to OpenMP <code class="docutils literal notranslate"><span class="pre">for/do</span></code> construct</p></li>
+<li><p>Loop index variables are <code class="docutils literal notranslate"><span class="pre">private</span></code> variables by default</p></li>
+</ul>
+</section>
+<section id="example-adding-two-vectors">
+<h3>Example: Adding two vectors<a class="headerlink" href="#example-adding-two-vectors" title="Permalink to this heading"></a></h3>
+<div class="admonition-adding-two-vectors typealong toggle-shown dropdown admonition" id="typealong-0">
+<p class="admonition-title">Adding two vectors</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-0-0-0" aria-selected="true" class="sphinx-tabs-tab" id="tab-0-0-0" name="0-0" role="tab" tabindex="0">CPU</button><button aria-controls="panel-0-0-1" aria-selected="false" class="sphinx-tabs-tab" id="tab-0-0-1" name="0-1" role="tab" tabindex="-1">OpenACC parallel</button><button aria-controls="panel-0-0-2" aria-selected="false" class="sphinx-tabs-tab" id="tab-0-0-2" name="0-2" role="tab" tabindex="-1">OpenACC kernels</button></div><div aria-labelledby="tab-0-0-0" class="sphinx-tabs-panel" id="panel-0-0-0" name="0-0" role="tabpanel" tabindex="0"><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span>
+<span class="cp">#ifdef _OPENACC</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;openacc.h&gt;</span>
+<span class="cp">#endif</span>
+
+<span class="cp">#define NX 102400</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">vecA</span><span class="p">[</span><span class="n">NX</span><span class="p">],</span><span class="w"> </span><span class="n">vecB</span><span class="p">[</span><span class="n">NX</span><span class="p">],</span><span class="w"> </span><span class="n">vecC</span><span class="p">[</span><span class="n">NX</span><span class="p">];</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">sum</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Initialization of the vectors */</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NX</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">vecA</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">((</span><span class="kt">double</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">NX</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">i</span><span class="p">));</span>
+<span class="w">        </span><span class="n">vecB</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vecA</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">vecA</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="cm">/* TODO:</span>
+<span class="cm">     * Implement vector addition on device with OpenACC</span>
+<span class="cm">     * vecC = vecA + vecB</span>
+<span class="cm">     */</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NX</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="n">vecC</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vecA</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">vecB</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span>
+
+<span class="w">    </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">    </span><span class="cm">/* Compute the check value */</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NX</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">sum</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">vecC</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Reduction sum: %18.16f</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">sum</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-0-0-1" class="sphinx-tabs-panel" hidden="true" id="panel-0-0-1" name="0-1" role="tabpanel" tabindex="0"><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span>
+<span class="cp">#ifdef _OPENACC</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;openacc.h&gt;</span>
+<span class="cp">#endif</span>
+
+<span class="cp">#define NX 102400</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">vecA</span><span class="p">[</span><span class="n">NX</span><span class="p">],</span><span class="w"> </span><span class="n">vecB</span><span class="p">[</span><span class="n">NX</span><span class="p">],</span><span class="w"> </span><span class="n">vecC</span><span class="p">[</span><span class="n">NX</span><span class="p">];</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">sum</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Initialization of the vectors */</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NX</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">vecA</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">((</span><span class="kt">double</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">NX</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">i</span><span class="p">));</span>
+<span class="w">        </span><span class="n">vecB</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vecA</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">vecA</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="cp">#pragma acc data copy(vecA,vecB,vecC)</span>
+<span class="p">{</span>
+<span class="cp">#pragma acc parallel</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="cp">#pragma acc loop</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NX</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">vecC</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vecA</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">vecB</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+<span class="w">    </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">    </span><span class="cm">/* Compute the check value */</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NX</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">sum</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">vecC</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Reduction sum: %18.16f</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">sum</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-0-0-2" class="sphinx-tabs-panel" hidden="true" id="panel-0-0-2" name="0-2" role="tabpanel" tabindex="0"><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span>
+<span class="cp">#ifdef _OPENACC</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;openacc.h&gt;</span>
+<span class="cp">#endif</span>
+
+<span class="cp">#define NX 102400</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">vecA</span><span class="p">[</span><span class="n">NX</span><span class="p">],</span><span class="w"> </span><span class="n">vecB</span><span class="p">[</span><span class="n">NX</span><span class="p">],</span><span class="w"> </span><span class="n">vecC</span><span class="p">[</span><span class="n">NX</span><span class="p">];</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">sum</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Initialization of the vectors */</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NX</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">vecA</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">((</span><span class="kt">double</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">NX</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">i</span><span class="p">));</span>
+<span class="w">        </span><span class="n">vecB</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vecA</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">vecA</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="cp">#pragma acc data copy(vecA,vecB,vecC)</span>
+<span class="p">{</span>
+<span class="cp">#pragma acc kernels</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NX</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">vecC</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vecA</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">vecB</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+<span class="w">    </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">    </span><span class="cm">/* Compute the check value */</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NX</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">sum</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">vecC</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Reduction sum: %18.16f</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">sum</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div></div>
+</div>
+</section>
+<section id="minfo">
+<h3><code class="docutils literal notranslate"><span class="pre">-Minfo</span></code><a class="headerlink" href="#minfo" title="Permalink to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pgcc<span class="w"> </span>-g<span class="w"> </span>-O3<span class="w"> </span>-acc<span class="w"> </span>-Minfo<span class="o">=</span>acc<span class="w"> </span>sum_parallel.c<span class="w"> </span>-o<span class="w"> </span>sum
+
+main:
+<span class="w">   </span><span class="m">21</span>,<span class="w"> </span>Generating<span class="w"> </span>copy<span class="o">(</span>vecA<span class="o">[</span>:<span class="o">]</span>,vecB<span class="o">[</span>:<span class="o">]</span>,vecC<span class="o">[</span>:<span class="o">])</span><span class="w"> </span><span class="o">[</span><span class="k">if</span><span class="w"> </span>not<span class="w"> </span>already<span class="w"> </span>present<span class="o">]</span>
+<span class="w">   </span><span class="m">23</span>,<span class="w"> </span>Generating<span class="w"> </span>Tesla<span class="w"> </span>code
+<span class="w">       </span><span class="m">25</span>,<span class="w"> </span><span class="c1">#pragma acc loop gang, vector(128) /* blockIdx.x threadIdx.x */</span>
+
+$<span class="w"> </span>pgcc<span class="w"> </span>-g<span class="w"> </span>-O3<span class="w"> </span>-acc<span class="w"> </span>-Minfo<span class="o">=</span>accel<span class="w"> </span>sum_kernels.c<span class="w"> </span>-o<span class="w"> </span>sum
+
+main:
+<span class="w">   </span><span class="m">21</span>,<span class="w"> </span>Generating<span class="w"> </span>copy<span class="o">(</span>vecA<span class="o">[</span>:<span class="o">]</span>,vecB<span class="o">[</span>:<span class="o">]</span>,vecC<span class="o">[</span>:<span class="o">])</span><span class="w"> </span><span class="o">[</span><span class="k">if</span><span class="w"> </span>not<span class="w"> </span>already<span class="w"> </span>present<span class="o">]</span>
+<span class="w">   </span><span class="m">23</span>,<span class="w"> </span>Loop<span class="w"> </span>is<span class="w"> </span>parallelizable
+<span class="w">       </span>Generating<span class="w"> </span>Tesla<span class="w"> </span>code
+<span class="w">       </span><span class="m">23</span>,<span class="w"> </span><span class="c1">#pragma acc loop gang, vector(128) /* blockIdx.x threadIdx.x */</span>
+</pre></div>
+</div>
+</section>
+<section id="example-pgi-acc-time-1">
+<h3>Example: <code class="docutils literal notranslate"><span class="pre">PGI_ACC_TIME=1</span></code><a class="headerlink" href="#example-pgi-acc-time-1" title="Permalink to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="w"> </span>$<span class="w"> </span>cat<span class="w"> </span>slurm-13186502.out<span class="w">  </span><span class="c1">#output of sum_parallel.c</span>
+
+<span class="w"> </span>Accelerator<span class="w"> </span>Kernel<span class="w"> </span>Timing<span class="w"> </span>data
+<span class="w"> </span>main<span class="w">  </span>NVIDIA<span class="w">  </span><span class="nv">devicenum</span><span class="o">=</span><span class="m">0</span>
+<span class="w">   </span>time<span class="o">(</span>us<span class="o">)</span>:<span class="w"> </span><span class="m">451</span>
+<span class="w">   </span><span class="m">21</span>:<span class="w"> </span>data<span class="w"> </span>region<span class="w"> </span>reached<span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="nb">times</span>
+<span class="w">       </span><span class="m">21</span>:<span class="w"> </span>data<span class="w"> </span>copyin<span class="w"> </span>transfers:<span class="w"> </span><span class="m">3</span>
+<span class="w">            </span>device<span class="w"> </span>time<span class="o">(</span>us<span class="o">)</span>:<span class="w"> </span><span class="nv">total</span><span class="o">=</span><span class="m">245</span><span class="w"> </span><span class="nv">max</span><span class="o">=</span><span class="m">100</span><span class="w"> </span><span class="nv">min</span><span class="o">=</span><span class="m">71</span><span class="w"> </span><span class="nv">avg</span><span class="o">=</span><span class="m">81</span>
+<span class="w">       </span><span class="m">29</span>:<span class="w"> </span>data<span class="w"> </span>copyout<span class="w"> </span>transfers:<span class="w"> </span><span class="m">3</span>
+<span class="w">            </span>device<span class="w"> </span>time<span class="o">(</span>us<span class="o">)</span>:<span class="w"> </span><span class="nv">total</span><span class="o">=</span><span class="m">206</span><span class="w"> </span><span class="nv">max</span><span class="o">=</span><span class="m">72</span><span class="w"> </span><span class="nv">min</span><span class="o">=</span><span class="m">67</span><span class="w"> </span><span class="nv">avg</span><span class="o">=</span><span class="m">68</span>
+<span class="w">   </span><span class="m">23</span>:<span class="w"> </span>compute<span class="w"> </span>region<span class="w"> </span>reached<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="nb">time</span>
+<span class="w">       </span><span class="m">23</span>:<span class="w"> </span>kernel<span class="w"> </span>launched<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="nb">time</span>
+<span class="w">           </span>grid:<span class="w"> </span><span class="o">[</span><span class="m">800</span><span class="o">]</span><span class="w">  </span>block:<span class="w"> </span><span class="o">[</span><span class="m">128</span><span class="o">]</span>
+<span class="w">           </span>elapsed<span class="w"> </span>time<span class="o">(</span>us<span class="o">)</span>:<span class="w"> </span><span class="nv">total</span><span class="o">=</span><span class="m">41</span><span class="w"> </span><span class="nv">max</span><span class="o">=</span><span class="m">41</span><span class="w"> </span><span class="nv">min</span><span class="o">=</span><span class="m">41</span><span class="w"> </span><span class="nv">avg</span><span class="o">=</span><span class="m">41</span>
+<span class="w">  </span>Reduction<span class="w"> </span>sum:<span class="w"> </span><span class="m">1</span>.2020569031119108
+
+$<span class="w"> </span>cat<span class="w"> </span>slurm-13186514.out
+
+Accelerator<span class="w"> </span>Kernel<span class="w"> </span>Timing<span class="w"> </span>data
+<span class="w"> </span>main<span class="w">  </span>NVIDIA<span class="w">  </span><span class="nv">devicenum</span><span class="o">=</span><span class="m">0</span>
+<span class="w">   </span>time<span class="o">(</span>us<span class="o">)</span>:<span class="w"> </span><span class="m">453</span>
+<span class="w">   </span><span class="m">21</span>:<span class="w"> </span>data<span class="w"> </span>region<span class="w"> </span>reached<span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="nb">times</span>
+<span class="w">       </span><span class="m">21</span>:<span class="w"> </span>data<span class="w"> </span>copyin<span class="w"> </span>transfers:<span class="w"> </span><span class="m">3</span>
+<span class="w">            </span>device<span class="w"> </span>time<span class="o">(</span>us<span class="o">)</span>:<span class="w"> </span><span class="nv">total</span><span class="o">=</span><span class="m">247</span><span class="w"> </span><span class="nv">max</span><span class="o">=</span><span class="m">100</span><span class="w"> </span><span class="nv">min</span><span class="o">=</span><span class="m">72</span><span class="w"> </span><span class="nv">avg</span><span class="o">=</span><span class="m">82</span>
+<span class="w">       </span><span class="m">26</span>:<span class="w"> </span>data<span class="w"> </span>copyout<span class="w"> </span>transfers:<span class="w"> </span><span class="m">3</span>
+<span class="w">            </span>device<span class="w"> </span>time<span class="o">(</span>us<span class="o">)</span>:<span class="w"> </span><span class="nv">total</span><span class="o">=</span><span class="m">206</span><span class="w"> </span><span class="nv">max</span><span class="o">=</span><span class="m">73</span><span class="w"> </span><span class="nv">min</span><span class="o">=</span><span class="m">66</span><span class="w"> </span><span class="nv">avg</span><span class="o">=</span><span class="m">68</span>
+<span class="w">   </span><span class="m">23</span>:<span class="w"> </span>compute<span class="w"> </span>region<span class="w"> </span>reached<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="nb">time</span>
+<span class="w">       </span><span class="m">23</span>:<span class="w"> </span>kernel<span class="w"> </span>launched<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="nb">time</span>
+<span class="w">           </span>grid:<span class="w"> </span><span class="o">[</span><span class="m">800</span><span class="o">]</span><span class="w">  </span>block:<span class="w"> </span><span class="o">[</span><span class="m">128</span><span class="o">]</span>
+<span class="w">           </span>elapsed<span class="w"> </span>time<span class="o">(</span>us<span class="o">)</span>:<span class="w"> </span><span class="nv">total</span><span class="o">=</span><span class="m">40</span><span class="w"> </span><span class="nv">max</span><span class="o">=</span><span class="m">40</span><span class="w"> </span><span class="nv">min</span><span class="o">=</span><span class="m">40</span><span class="w"> </span><span class="nv">avg</span><span class="o">=</span><span class="m">40</span>
+Reduction<span class="w"> </span>sum:<span class="w"> </span><span class="m">1</span>.2020569031119108
+</pre></div>
+</div>
+</section>
+</section>
+<section id="nvidia-nvprof">
+<h2>NVIDIA nvprof<a class="headerlink" href="#nvidia-nvprof" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>NVIDIA nvprof provides a simple interface to collect on a target without using the GUI. (new NSight system)</p>
+<ul>
+<li><p>GPU profiling capabilities: High-level usage statistics, Timeline collection, Analysis metrics</p></li>
+<li><p>basic CPU sampling</p></li>
+</ul>
+</li>
+</ul>
+<section id="the-himeno-stencil-benchmark">
+<h3>The Himeno stencil benchmark<a class="headerlink" href="#the-himeno-stencil-benchmark" title="Permalink to this heading"></a></h3>
+<p>Solving Poisson’s equation for incompressible fluid by the Jacobi iteration method.</p>
+<img alt="../_images/himeno_stencil.png" src="../_images/himeno_stencil.png" />
+<p>(<a class="reference external" href="https://blogs.fau.de/hager/archives/7850">https://blogs.fau.de/hager/archives/7850</a>)</p>
+<div class="admonition-himeno-code typealong toggle-shown dropdown admonition" id="typealong-1">
+<p class="admonition-title">himeno code</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-1-1-0" aria-selected="true" class="sphinx-tabs-tab" id="tab-1-1-0" name="1-0" role="tab" tabindex="0">c</button><button aria-controls="panel-1-1-1" aria-selected="false" class="sphinx-tabs-tab" id="tab-1-1-1" name="1-1" role="tab" tabindex="-1">fortran</button></div><div aria-labelledby="tab-1-1-0" class="sphinx-tabs-panel" id="panel-1-1-0" name="1-0" role="tabpanel" tabindex="0"><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/*********************************************************************</span>
+<span class="cm">      This benchmark test program is measuring a cpu performance </span>
+<span class="cm">      of floating point operation and memory access speed.  </span>
+
+<span class="cm">      Modification needed for testing turget computer!!</span>
+<span class="cm">      Please adjust parameter : nn to take one minute to execute</span>
+<span class="cm">      all calculation.  Original parameter set is for PC with </span>
+<span class="cm">      200 MHz MMX PENTIUM, whose score using this benchmark test</span>
+<span class="cm">      is about 32.3 MFLOPS.</span>
+
+<span class="cm">      If you have any question, please ask me via email.</span>
+<span class="cm">      written by Ryutaro HIMENO, October 3, 1998.</span>
+<span class="cm">      Version 2.0  </span>
+<span class="cm">      ----------------------------------------------</span>
+<span class="cm">         Ryutaro Himeno, Dr. of Eng.</span>
+<span class="cm">         Head of Computer Information Center, </span>
+<span class="cm">         The Institute of Pysical and Chemical Research (RIKEN)</span>
+<span class="cm">         Email : himeno@postman.riken.go.jp</span>
+<span class="cm">      ---------------------------------------------------------------</span>
+<span class="cm">      You can adjust the size of this benchmark code to fit your target</span>
+<span class="cm">      computer.  In that case, please chose following sets of </span>
+<span class="cm">      (mimax,mjmax,mkmax):</span>
+<span class="cm">       small : 129,65,65</span>
+<span class="cm">       midium: 257,129,129</span>
+<span class="cm">       large : 513,257,257</span>
+<span class="cm">       ext.large: 1025,513,513</span>
+<span class="cm">      This program is to measure a computer performance in MFLOPS</span>
+<span class="cm">      by using a kernel which appears in a linear solver of pressure </span>
+<span class="cm">      Poisson included in an incompressible Navier-Stokes solver. </span>
+<span class="cm">      A point-Jacobi method is employed in this solver.</span>
+<span class="cm">      ------------------</span>
+<span class="cm">      Finite-difference method, curvilinear coodinate system</span>
+<span class="cm">      Vectorizable and parallelizable on each grid point</span>
+<span class="cm">      No. of grid points : imax x jmax x kmax including boundaries</span>
+<span class="cm">      ------------------</span>
+<span class="cm">      A,B,C:coefficient matrix, wrk1: source term of Poisson equation</span>
+<span class="cm">      wrk2 : working area, OMEGA : relaxation parameter</span>
+<span class="cm">      BND:control variable for boundaries and objects ( = 0 or 1)</span>
+<span class="cm">      P: pressure </span>
+<span class="cm">       -----------------</span>
+<span class="cm">      -------------------     </span>
+<span class="cm">      &quot;use portlib&quot; statement on the next line is for Visual fortran </span>
+<span class="cm">      to use UNIX libraries.  Please remove it if your system is UNIX.</span>
+<span class="cm">      -------------------</span>
+<span class="cm">     use portlib</span>
+
+<span class="cm">     Version 0.2 </span>
+<span class="cm">*********************************************************************/</span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;himeno_C.h&quot;</span>
+
+<span class="cp">#ifdef SMALL</span>
+<span class="cp">#define MIMAX            129</span>
+<span class="cp">#define MJMAX            65</span>
+<span class="cp">#define MKMAX            65</span>
+<span class="cp">#endif</span>
+
+<span class="cp">#ifdef MIDDLE</span>
+<span class="cp">#define MIMAX            257</span>
+<span class="cp">#define MJMAX            129</span>
+<span class="cp">#define MKMAX            129</span>
+<span class="cp">#endif</span>
+
+<span class="cp">#ifdef LARGE</span>
+<span class="cp">#define MIMAX            513</span>
+<span class="cp">#define MJMAX            257</span>
+<span class="cp">#define MKMAX            257</span>
+<span class="cp">#endif</span>
+
+<span class="cp">#ifdef DOUBLE_PRECISION</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">real</span><span class="p">;</span>
+<span class="cp">#else</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">real</span><span class="p">;</span>
+<span class="cp">#endif</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">real</span><span class="w">  </span><span class="n">p</span><span class="p">[</span><span class="n">MIMAX</span><span class="p">][</span><span class="n">MJMAX</span><span class="p">][</span><span class="n">MKMAX</span><span class="p">];</span>
+<span class="k">static</span><span class="w"> </span><span class="n">real</span><span class="w">  </span><span class="n">a</span><span class="p">[</span><span class="n">MIMAX</span><span class="p">][</span><span class="n">MJMAX</span><span class="p">][</span><span class="n">MKMAX</span><span class="p">][</span><span class="mi">4</span><span class="p">],</span>
+<span class="w">              </span><span class="n">b</span><span class="p">[</span><span class="n">MIMAX</span><span class="p">][</span><span class="n">MJMAX</span><span class="p">][</span><span class="n">MKMAX</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span>
+<span class="w">              </span><span class="n">c</span><span class="p">[</span><span class="n">MIMAX</span><span class="p">][</span><span class="n">MJMAX</span><span class="p">][</span><span class="n">MKMAX</span><span class="p">][</span><span class="mi">3</span><span class="p">];</span>
+<span class="k">static</span><span class="w"> </span><span class="n">real</span><span class="w">  </span><span class="n">bnd</span><span class="p">[</span><span class="n">MIMAX</span><span class="p">][</span><span class="n">MJMAX</span><span class="p">][</span><span class="n">MKMAX</span><span class="p">];</span>
+<span class="k">static</span><span class="w"> </span><span class="n">real</span><span class="w">  </span><span class="n">wrk1</span><span class="p">[</span><span class="n">MIMAX</span><span class="p">][</span><span class="n">MJMAX</span><span class="p">][</span><span class="n">MKMAX</span><span class="p">],</span>
+<span class="w">              </span><span class="n">wrk2</span><span class="p">[</span><span class="n">MIMAX</span><span class="p">][</span><span class="n">MJMAX</span><span class="p">][</span><span class="n">MKMAX</span><span class="p">];</span>
+
+<span class="cp">#define NN               3</span>
+
+<span class="kt">double</span><span class="w"> </span><span class="nf">second</span><span class="p">();</span>
+<span class="n">real</span><span class="w"> </span><span class="nf">jacobi</span><span class="p">(</span><span class="kt">int</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">initmt</span><span class="p">();</span>
+
+<span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">imax</span><span class="p">,</span><span class="w"> </span><span class="n">jmax</span><span class="p">,</span><span class="w"> </span><span class="n">kmax</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="n">real</span><span class="w"> </span><span class="n">omega</span><span class="p">;</span>
+
+<span class="kt">int</span>
+<span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">,</span><span class="w"> </span><span class="n">k</span><span class="p">;</span>
+<span class="w">  </span><span class="n">real</span><span class="w"> </span><span class="n">gosa</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">cpu0</span><span class="p">,</span><span class="w"> </span><span class="n">cpu1</span><span class="p">,</span><span class="w"> </span><span class="n">nflop</span><span class="p">,</span><span class="w"> </span><span class="n">xmflops2</span><span class="p">,</span><span class="w"> </span><span class="n">score</span><span class="p">;</span>
+
+<span class="w">  </span><span class="n">omega</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.8</span><span class="p">;</span>
+<span class="w">  </span><span class="n">imax</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MIMAX</span><span class="mi">-1</span><span class="p">;</span>
+<span class="w">  </span><span class="n">jmax</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MJMAX</span><span class="mi">-1</span><span class="p">;</span>
+<span class="w">  </span><span class="n">kmax</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MKMAX</span><span class="mi">-1</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*</span>
+<span class="cm">   *    Initializing matrixes</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="n">initmt</span><span class="p">();</span>
+
+<span class="w">  </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;mimax = %d mjmax = %d mkmax = %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="n">MIMAX</span><span class="p">,</span><span class="w"> </span><span class="n">MJMAX</span><span class="p">,</span><span class="w"> </span><span class="n">MKMAX</span><span class="p">);</span>
+<span class="w">  </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;imax = %d jmax = %d kmax =%d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="n">imax</span><span class="p">,</span><span class="n">jmax</span><span class="p">,</span><span class="n">kmax</span><span class="p">);</span>
+
+<span class="w">  </span><span class="cm">/*</span>
+<span class="cm">   *    Start measuring</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="n">cpu0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">second</span><span class="p">();</span>
+
+<span class="w">  </span><span class="cm">/*</span>
+<span class="cm">   *    Jacobi iteration</span>
+<span class="cm">   */</span>
+
+<span class="w">  </span><span class="n">gosa</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">jacobi</span><span class="p">(</span><span class="n">NN</span><span class="p">);</span>
+<span class="w">  </span>
+<span class="w">  </span><span class="n">cpu1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">second</span><span class="p">();</span>
+<span class="w">  </span><span class="n">cpu1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cpu1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">cpu0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="n">nflop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">kmax</span><span class="mi">-2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">jmax</span><span class="mi">-2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">imax</span><span class="mi">-2</span><span class="p">)</span><span class="o">*</span><span class="mi">34</span><span class="p">;</span>
+
+<span class="w">  </span><span class="k">if</span><span class="p">(</span><span class="n">cpu1</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">)</span>
+<span class="w">    </span><span class="n">xmflops2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nflop</span><span class="o">/</span><span class="n">cpu1</span><span class="o">*</span><span class="mf">1.0e-6</span><span class="o">*</span><span class="p">(</span><span class="n">real</span><span class="p">)</span><span class="n">NN</span><span class="p">;</span>
+
+<span class="w">  </span><span class="n">score</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xmflops2</span><span class="o">/</span><span class="mf">32.27</span><span class="p">;</span>
+<span class="w">  </span>
+<span class="w">  </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">cpu : %f sec.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">cpu1</span><span class="p">);</span>
+<span class="w">  </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Loop executed for %d times</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="n">NN</span><span class="p">);</span>
+<span class="w">  </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Gosa : %e </span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="n">gosa</span><span class="p">);</span>
+<span class="w">  </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;MFLOPS measured : %f</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="n">xmflops2</span><span class="p">);</span>
+<span class="w">  </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Score based on MMX Pentium 200MHz : %f</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="n">score</span><span class="p">);</span>
+<span class="w">  </span>
+<span class="w">  </span><span class="c1">// Now estimate how many iterations could be done in 20s</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">nn2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">20.0</span><span class="o">/</span><span class="n">cpu1</span><span class="o">*</span><span class="n">NN</span><span class="p">;</span>
+<span class="w">  </span><span class="n">cpu0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">second</span><span class="p">();</span>
+<span class="w">  </span><span class="n">gosa</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">jacobi</span><span class="p">(</span><span class="n">nn2</span><span class="p">);</span>
+<span class="w">  </span><span class="n">cpu1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">second</span><span class="p">();</span>
+<span class="w">  </span><span class="n">cpu1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cpu1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">cpu0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="n">nflop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">kmax</span><span class="mi">-2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">jmax</span><span class="mi">-2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">imax</span><span class="mi">-2</span><span class="p">)</span><span class="o">*</span><span class="mi">34</span><span class="p">;</span>
+
+<span class="w">  </span><span class="k">if</span><span class="p">(</span><span class="n">cpu1</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">)</span>
+<span class="w">    </span><span class="n">xmflops2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nflop</span><span class="o">/</span><span class="n">cpu1</span><span class="o">*</span><span class="mf">1.0e-6</span><span class="o">*</span><span class="p">(</span><span class="n">real</span><span class="p">)</span><span class="n">nn2</span><span class="p">;</span>
+
+<span class="w">  </span><span class="n">score</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xmflops2</span><span class="o">/</span><span class="mf">32.27</span><span class="p">;</span>
+<span class="w">  </span>
+<span class="w">  </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">cpu : %f sec.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">cpu1</span><span class="p">);</span>
+<span class="w">  </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Loop executed for %d times</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="n">nn2</span><span class="p">);</span>
+<span class="w">  </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Gosa : %e </span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="n">gosa</span><span class="p">);</span>
+<span class="w">  </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;MFLOPS measured : %f</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="n">xmflops2</span><span class="p">);</span>
+<span class="w">  </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Score based on MMX Pentium 200MHz : %f</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="n">score</span><span class="p">);</span>
+<span class="w">  </span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">initmt</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// TODO: Implement data initialization with OpenACC on device</span>
+<span class="w">  </span>
+<span class="w">  </span><span class="c1">// TODO: Implement computation with OpenACC on device</span>
+<span class="w">  </span><span class="k">for</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">&lt;</span><span class="n">imax</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span>
+<span class="w">    </span><span class="k">for</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">&lt;</span><span class="n">jmax</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">j</span><span class="p">)</span>
+<span class="w">      </span><span class="k">for</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">0</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="n">k</span><span class="o">&lt;</span><span class="n">kmax</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">k</span><span class="p">){</span>
+<span class="w">        </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span><span class="o">=</span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span><span class="o">=</span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">wrk1</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span><span class="o">=</span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">bnd</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span><span class="o">=</span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// TODO: Implement computation with OpenACC on device</span>
+<span class="w">  </span><span class="k">for</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">&lt;</span><span class="n">imax</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span>
+<span class="w">    </span><span class="k">for</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">&lt;</span><span class="n">jmax</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">j</span><span class="p">)</span>
+<span class="w">      </span><span class="k">for</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">0</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="n">k</span><span class="o">&lt;</span><span class="n">kmax</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">k</span><span class="p">){</span>
+<span class="w">        </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mf">1.0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="mf">1.0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="mf">1.0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span><span class="o">=</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">6.0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mf">1.0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="mf">1.0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="mf">1.0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span><span class="o">=</span><span class="p">(</span><span class="n">real</span><span class="p">)(</span><span class="n">k</span><span class="o">*</span><span class="n">k</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">real</span><span class="p">)((</span><span class="n">kmax</span><span class="mi">-1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">kmax</span><span class="mi">-1</span><span class="p">));</span>
+<span class="w">        </span><span class="n">wrk1</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span><span class="o">=</span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">bnd</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span><span class="o">=</span><span class="mf">1.0</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">real</span><span class="w"> </span><span class="nf">jacobi</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">nn</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">n</span><span class="p">;</span>
+<span class="w">  </span><span class="n">real</span><span class="w"> </span><span class="n">gosa</span><span class="p">,</span><span class="w"> </span><span class="n">s0</span><span class="p">,</span><span class="w"> </span><span class="n">ss</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// TODO: Implement data initialization with OpenACC on device</span>
+<span class="w">  </span><span class="k">for</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="n">n</span><span class="o">&lt;</span><span class="n">nn</span><span class="p">;</span><span class="o">++</span><span class="n">n</span><span class="p">){</span>
+<span class="w">    </span><span class="n">gosa</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// TODO: Implement computation with OpenACC on device</span>
+<span class="w">    </span><span class="k">for</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">&lt;</span><span class="n">imax</span><span class="mi">-1</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span>
+<span class="w">      </span><span class="k">for</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">&lt;</span><span class="n">jmax</span><span class="mi">-1</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">j</span><span class="p">)</span>
+<span class="w">        </span><span class="k">for</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="n">k</span><span class="o">&lt;</span><span class="n">kmax</span><span class="mi">-1</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">k</span><span class="p">){</span>
+<span class="w">          </span><span class="n">s0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="w">  </span><span class="p">][</span><span class="n">k</span><span class="w">  </span><span class="p">]</span>
+<span class="w">             </span><span class="o">+</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="w">  </span><span class="p">][</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">k</span><span class="w">  </span><span class="p">]</span>
+<span class="w">             </span><span class="o">+</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="w">  </span><span class="p">][</span><span class="n">j</span><span class="w">  </span><span class="p">][</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+<span class="w">             </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">k</span><span class="w">  </span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="mi">-1</span><span class="p">][</span><span class="n">k</span><span class="w">  </span><span class="p">]</span>
+<span class="w">                               </span><span class="o">-</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="mi">-1</span><span class="p">][</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">k</span><span class="w">  </span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="mi">-1</span><span class="p">][</span><span class="n">j</span><span class="mi">-1</span><span class="p">][</span><span class="n">k</span><span class="w">  </span><span class="p">]</span><span class="w"> </span><span class="p">)</span>
+<span class="w">             </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="w">  </span><span class="p">][</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="w">  </span><span class="p">][</span><span class="n">j</span><span class="mi">-1</span><span class="p">][</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+<span class="w">                               </span><span class="o">-</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="w">  </span><span class="p">][</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">k</span><span class="mi">-1</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="w">  </span><span class="p">][</span><span class="n">j</span><span class="mi">-1</span><span class="p">][</span><span class="n">k</span><span class="mi">-1</span><span class="p">]</span><span class="w"> </span><span class="p">)</span>
+<span class="w">             </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="w">  </span><span class="p">][</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="mi">-1</span><span class="p">][</span><span class="n">j</span><span class="w">  </span><span class="p">][</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+<span class="w">                               </span><span class="o">-</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="w">  </span><span class="p">][</span><span class="n">k</span><span class="mi">-1</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="mi">-1</span><span class="p">][</span><span class="n">j</span><span class="w">  </span><span class="p">][</span><span class="n">k</span><span class="mi">-1</span><span class="p">]</span><span class="w"> </span><span class="p">)</span>
+<span class="w">             </span><span class="o">+</span><span class="w"> </span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="mi">-1</span><span class="p">][</span><span class="n">j</span><span class="w">  </span><span class="p">][</span><span class="n">k</span><span class="w">  </span><span class="p">]</span>
+<span class="w">             </span><span class="o">+</span><span class="w"> </span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="w">  </span><span class="p">][</span><span class="n">j</span><span class="mi">-1</span><span class="p">][</span><span class="n">k</span><span class="w">  </span><span class="p">]</span>
+<span class="w">             </span><span class="o">+</span><span class="w"> </span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="w">  </span><span class="p">][</span><span class="n">j</span><span class="w">  </span><span class="p">][</span><span class="n">k</span><span class="mi">-1</span><span class="p">]</span>
+<span class="w">             </span><span class="o">+</span><span class="w"> </span><span class="n">wrk1</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">];</span>
+
+<span class="w">          </span><span class="n">ss</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">s0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">bnd</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">];</span>
+
+<span class="w">	  </span><span class="n">gosa</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gosa</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">ss</span><span class="o">*</span><span class="n">ss</span><span class="p">;</span>
+
+<span class="w">          </span><span class="n">wrk2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">omega</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">ss</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;nn %d, gosa %f</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">gosa</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// TODO: Implement computation with OpenACC on device</span>
+<span class="w">    </span><span class="k">for</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">&lt;</span><span class="n">imax</span><span class="mi">-1</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span>
+<span class="w">      </span><span class="k">for</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">&lt;</span><span class="n">jmax</span><span class="mi">-1</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">j</span><span class="p">)</span>
+<span class="w">        </span><span class="k">for</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="n">k</span><span class="o">&lt;</span><span class="n">kmax</span><span class="mi">-1</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">k</span><span class="p">)</span>
+<span class="w">          </span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">wrk2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">];</span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="cm">/* end n loop */</span>
+
+<span class="w">  </span><span class="k">return</span><span class="p">(</span><span class="n">gosa</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">double</span><span class="w"> </span><span class="nf">second</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;sys/time.h&gt;</span>
+
+<span class="w">  </span><span class="k">struct</span><span class="w"> </span><span class="nc">timeval</span><span class="w"> </span><span class="n">tm</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="p">;</span>
+
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">base_sec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="n">base_usec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="n">gettimeofday</span><span class="p">(</span><span class="o">&amp;</span><span class="n">tm</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span>
+<span class="w">  </span>
+<span class="w">  </span><span class="k">if</span><span class="p">(</span><span class="n">base_sec</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">base_usec</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="n">base_sec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tm</span><span class="p">.</span><span class="n">tv_sec</span><span class="p">;</span>
+<span class="w">      </span><span class="n">base_usec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tm</span><span class="p">.</span><span class="n">tv_usec</span><span class="p">;</span>
+<span class="w">      </span><span class="n">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">double</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">tm</span><span class="p">.</span><span class="n">tv_sec</span><span class="o">-</span><span class="n">base_sec</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span>
+<span class="w">      </span><span class="p">((</span><span class="kt">double</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">tm</span><span class="p">.</span><span class="n">tv_usec</span><span class="o">-</span><span class="n">base_usec</span><span class="p">))</span><span class="o">/</span><span class="mf">1.0e6</span><span class="w"> </span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-1-1-1" class="sphinx-tabs-panel" hidden="true" id="panel-1-1-1" name="1-1" role="tabpanel" tabindex="0"></div></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>srun<span class="w"> </span>-n<span class="w"> </span><span class="m">1</span><span class="w"> </span>nvprof<span class="w"> </span>--cpu-profiling<span class="w"> </span>on<span class="w"> </span>--cpu-profiling-mode<span class="w"> </span>top-down<span class="w"> </span>./himeno.x
+<span class="o">========</span><span class="w"> </span>CPU<span class="w"> </span>profiling<span class="w"> </span>result<span class="w"> </span><span class="o">(</span>top<span class="w"> </span>down<span class="o">)</span>:
+Time<span class="o">(</span>%<span class="o">)</span><span class="w">      </span>Time<span class="w">  </span>Name
+<span class="m">85</span>.74%<span class="w">    </span><span class="m">18</span>.16s<span class="w">  </span>jacobi
+<span class="w"> </span><span class="m">7</span>.46%<span class="w">     </span><span class="m">1</span>.58s<span class="w">  </span>initmt
+<span class="w"> </span><span class="m">0</span>.94%<span class="w">     </span>200ms<span class="w">  </span><span class="p">|</span><span class="w"> </span>???
+<span class="w"> </span><span class="m">6</span>.75%<span class="w">     </span><span class="m">1</span>.43s<span class="w">  </span>__c_mcopy4_sky
+<span class="w"> </span><span class="m">0</span>.05%<span class="w">      </span>10ms<span class="w">  </span>__c_mcopy4
+</pre></div>
+</div>
+</section>
+</section>
+<section id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Profiling is essential for optimization</p></li>
+<li><p>NVPROF and NVVP for NVIDIA platform</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../1.01_openacc-introduction/" class="btn btn-neutral float-left" title="Introduction to OpenACC" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../3.01_openacc_optimization/" class="btn btn-neutral float-right" title="OpenACC: Parallelization and Optimization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Jing Gong and individual contributors..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
