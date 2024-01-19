@@ -3,7 +3,7 @@
 Introduction to GPU
 ===================
 
-Moore's law
+The Moore's law
 -----------
 
 The number of transistors in a dense integrated circuit doubles about every two years.
@@ -26,10 +26,10 @@ Achieving performance has been based on two main strategies over the years:
 
     - More recently, increase the number of physical cores.
 
-Graphics processing units
+Graphics Processing Units
 -------------------------
 
-The Graphics processing units (GPU) have been the most common accelerators during the last few years, the term GPU sometimes is used interchangeably with the term accelerator.
+The graphics processing units (GPU) have been the most common accelerators during the last few years, the term GPU sometimes is used interchangeably with the term accelerator.
 GPUs were initially developed for highly-parallel task of graphic processing.
 Over the years, were used more and more in HPC.
 GPUs are a specialized parallel hardware for floating point operations.
@@ -134,3 +134,10 @@ Summary
 - Language extensions, such as CUDA, HIP, can give more performance, but harder to use.
 
 - Directive based methods are easy to implement, but can not leverage all the GPU capabilities.
+
+
+See also
+--------
+
+* `Introduction to GPU Programming <https://enccs.github.io/intro-gpu-programming/>`__
+* `GPU Programming: When, Why and How? <https://enccs.github.io/gpu-programming/>`__
